@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiService } from "../services/api";
 
 export const useCameras = () => {
   const [cameras, setCameras] = useState([]);
@@ -18,13 +19,7 @@ export const useCameras = () => {
   const fetchCameras = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://127.0.0.1:8000/api/v1/cameras");
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiService.getCameras();
       setCameras(data);
       setError(null);
     } catch (err) {
@@ -96,24 +91,11 @@ export const useCameras = () => {
     try {
       setAddCameraLoading(true);
       
-      const response = await fetch("http://127.0.0.1:8000/api/v1/cameras", {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: addCameraForm.name.trim(),
-          rtsp_url: addCameraForm.rtsp_url.trim(),
-          input_size_value: inputSizeValue
-        }),
+      const newCamera = await apiService.addCamera({
+        name: addCameraForm.name.trim(),
+        rtsp_url: addCameraForm.rtsp_url.trim(),
+        input_size_value: inputSizeValue
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
-      }
-
-      const newCamera = await response.json();
       
       // Thêm camera mới vào state
       setCameras(prev => [...prev, newCamera]);

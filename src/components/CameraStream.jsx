@@ -10,6 +10,7 @@ import AddCameraModal from "./AddCameraModal";
 import LoadingScreen from "./LoadingScreen";
 import ErrorScreen from "./ErrorScreen";
 import ToastContainer from "./ToastContainer";
+import SettlementChart from "./SettlementChart";
 
 export default function CameraStream() {
   // State cho tab navigation
@@ -109,12 +110,9 @@ export default function CameraStream() {
         </div>
       </div>
 
-      {/* Nửa màn hình bên phải - Hello */}
-      <div className="w-1/2 flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <h1 className="text-6xl font-bold text-blue-600 mb-4">Hello</h1>
-          <p className="text-xl text-gray-600">cho tôi</p>
-        </div>
+      {/* Nửa màn hình bên phải - Biểu đồ độ lún */}
+      <div className="w-1/2 p-4">
+        <SettlementChart />
       </div>
 
       {/* Modal thêm camera */}

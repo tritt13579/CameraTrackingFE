@@ -94,7 +94,7 @@ export default function AddCameraModal({
               required
               disabled={loading}
             />
-            <p className="text-xs text-gray-500 mt-1">Kích thước đầu vào cho model AI (ví dụ: 23.0)</p>
+            <p className="text-xs text-gray-500 mt-1">Kích thước đầu vào(ví dụ: 23.0)</p>
           </div>
 
           {/* Buttons */}

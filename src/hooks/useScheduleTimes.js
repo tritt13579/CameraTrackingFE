@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { apiService } from "../services/api";
 
 export const useScheduleTimes = () => {
   const [scheduleTimes, setScheduleTimes] = useState([]);
@@ -7,13 +8,7 @@ export const useScheduleTimes = () => {
   const fetchScheduleTimes = async () => {
     try {
       setScheduleLoading(true);
-      const response = await fetch("http://127.0.0.1:8000/api/v1/schedule-times");
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiService.getScheduleTimes();
       setScheduleTimes(data);
     } catch (err) {
       console.error("Lỗi khi tải schedule times:", err);
@@ -24,16 +19,7 @@ export const useScheduleTimes = () => {
 
   const updateScheduleTime = async (scheduleTimeId, isActive) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/schedule-times/${scheduleTimeId}?is_active=${isActive}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await apiService.updateScheduleTime(scheduleTimeId, { is_active: isActive });
 
       // Cập nhật state local
       setScheduleTimes(prev => 
