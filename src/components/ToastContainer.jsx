@@ -19,7 +19,7 @@ export default function ToastContainer() {
   }
 
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-2 sm:top-4 right-2 sm:right-4 left-2 sm:left-auto z-50 space-y-2">
       {toasts.map((toast) => (
         <Toast
           key={toast.id}

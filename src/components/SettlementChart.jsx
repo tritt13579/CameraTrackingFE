@@ -12,8 +12,9 @@ import {
 import { Line } from "react-chartjs-2";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { vi } from "date-fns/locale";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { apiService } from "../services/api";
-import ChartInfo from "./ChartInfo";
 
 ChartJS.register(
   CategoryScale,
@@ -30,15 +31,17 @@ export default function SettlementChart() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [interval, setInterval] = useState("hour"); // hour, day, month, year
-  const [dateRange, setDateRange] = useState({
-    from: format(startOfDay(subDays(new Date(), 7)), "yyyy-MM-dd"),
-    to: format(endOfDay(new Date()), "yyyy-MM-dd")
-  });
+  const [dateRange, setDateRange] = useState([
+    startOfDay(subDays(new Date(), 7)),
+    endOfDay(new Date())
+  ]);
+  const [startDate, endDate] = dateRange;
+  const [isDateRangeComplete, setIsDateRangeComplete] = useState(true); // Thêm state để theo dõi việc chọn date range
 
   // Tính toán thời gian bắt đầu và kết thúc
   const getTimeRange = () => {
-    const from = new Date(dateRange.from + "T00:00:00");
-    const to = new Date(dateRange.to + "T23:59:59");
+    const from = startDate;
+    const to = endDate;
 
     return {
       from: from.toISOString(),
@@ -46,16 +49,27 @@ export default function SettlementChart() {
     };
   };
 
-  // Xử lý thay đổi ngày
-  const handleDateChange = (field, value) => {
-    setDateRange(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // Xử lý thay đổi date range
+  const handleDateRangeChange = (update) => {
+    setDateRange(update);
+    const [newStartDate, newEndDate] = update;
+    
+    // Kiểm tra xem cả hai ngày đã được chọn chưa
+    const isComplete = newStartDate && newEndDate;
+    setIsDateRangeComplete(isComplete);
+    
+    // Không xóa dữ liệu biểu đồ khi đang chọn ngày
+    // Chỉ cập nhật khi đã chọn xong
   };
 
   // Fetch dữ liệu từ API
   const fetchChartData = async () => {
+    // Chỉ fetch khi date range đã hoàn chỉnh
+    if (!isDateRangeComplete) {
+      console.log("⏳ Chưa chọn đủ ngày bắt đầu và kết thúc");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -136,8 +150,11 @@ export default function SettlementChart() {
 
   // Tự động fetch dữ liệu khi component mount hoặc khi thay đổi tham số
   useEffect(() => {
-    fetchChartData();
-  }, [interval, dateRange]);
+    // Chỉ fetch khi date range đã hoàn chỉnh
+    if (isDateRangeComplete) {
+      fetchChartData();
+    }
+  }, [interval, dateRange, isDateRangeComplete]);
 
   const chartOptions = {
     responsive: true,
@@ -239,132 +256,124 @@ export default function SettlementChart() {
   ];
 
   return (
-    <div className="h-full flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      {/* Chart Info */}
-      <ChartInfo />
-
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">Biểu đồ độ lún</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Theo dõi độ lún theo thời gian thực
-          </p>
+    <div className="h-full flex flex-col bg-white rounded-xl shadow-lg border border-gray-100 p-3 sm:p-6">
+      {/* Header với gradient background */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 sm:p-6 mb-3 sm:mb-6 border border-blue-100">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 space-y-2 sm:space-y-0">
+          <div>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-1 sm:mb-2">Biểu đồ độ lún</h2>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Theo dõi độ lún theo thời gian thực
+            </p>
+          </div>
         </div>
-        
+
         {/* Controls */}
-        <div className="flex items-center space-x-4">
-          {/* Date Range Picker - UI giống booking website */}
-          <div className="flex items-center bg-white border border-gray-300 rounded-lg shadow-sm">
-            <div className="flex items-center px-3 py-2 border-r border-gray-300">
-              <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between flex-wrap gap-3 sm:gap-4">
+          {/* Date Range Picker */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full lg:w-auto">
+            <div className="flex items-center bg-white rounded-lg shadow-sm border border-gray-200 p-2 w-full sm:w-auto">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mr-2 sm:mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <div>
-                <label className="text-xs text-gray-500 block">Từ ngày</label>
-                <input
-                  type="date"
-                  value={dateRange.from}
-                  onChange={(e) => handleDateChange("from", e.target.value)}
-                  className="text-sm font-medium text-gray-900 border-none outline-none bg-transparent"
-                />
-              </div>
+              <DatePicker
+                selectsRange={true}
+                startDate={startDate}
+                endDate={endDate}
+                onChange={handleDateRangeChange}
+                className="text-sm font-medium text-gray-900 border-none outline-none bg-transparent cursor-pointer w-full sm:w-auto"
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Chọn khoảng thời gian"
+                locale={vi}
+                showPopperArrow={false}
+                popperClassName="datepicker-popper"
+                popperPlacement="bottom-start"
+                customInput={
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-2 w-full">
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs sm:text-sm text-gray-600">Từ:</span>
+                      <span className="font-medium text-xs sm:text-sm">
+                        {startDate ? format(startDate, "dd/MM/yyyy") : "Chọn ngày"}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-xs sm:text-sm text-gray-600">Đến:</span>
+                      <span className="font-medium text-xs sm:text-sm">
+                        {endDate ? format(endDate, "dd/MM/yyyy") : "Chọn ngày"}
+                      </span>
+                    </div>
+                  </div>
+                }
+              />
             </div>
-            <div className="flex items-center px-3 py-2">
-              <svg className="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <div>
-                <label className="text-xs text-gray-500 block">Đến ngày</label>
-                <input
-                  type="date"
-                  value={dateRange.to}
-                  onChange={(e) => handleDateChange("to", e.target.value)}
-                  className="text-sm font-medium text-gray-900 border-none outline-none bg-transparent"
-                />
-              </div>
+
+            {/* Interval Selector */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+              <label className="text-xs sm:text-sm font-medium text-gray-700">Nhóm theo:</label>
+              <select
+                value={interval}
+                onChange={(e) => setInterval(e.target.value)}
+                className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm bg-white shadow-sm w-full sm:w-auto"
+              >
+                {intervalOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
-
-          {/* Interval Selector */}
-          <div className="flex items-center space-x-2">
-            <label className="text-sm font-medium text-gray-700">Nhóm theo:</label>
-            <select
-              value={interval}
-              onChange={(e) => setInterval(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-            >
-              {intervalOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Refresh Button */}
-          <button
-            onClick={fetchChartData}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
-          >
-            {loading ? (
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Đang tải...
-              </div>
-            ) : (
-              <div className="flex items-center">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Làm mới
-              </div>
-            )}
-          </button>
         </div>
       </div>
 
       {/* Chart Container */}
-      <div className="flex-1 min-h-0">
+      <div className="flex-1 min-h-0 bg-gray-50 rounded-xl p-3 sm:p-6">
         {loading && !chartData ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Đang tải dữ liệu biểu đồ...</p>
+              <div className="animate-spin rounded-full h-12 w-12 sm:h-16 sm:w-16 border-b-4 border-blue-600 mx-auto mb-4 sm:mb-6"></div>
+              <p className="text-gray-600 text-sm sm:text-lg font-medium">Đang tải dữ liệu biểu đồ...</p>
             </div>
           </div>
         ) : error ? (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
-              <p className="text-red-600 font-medium mb-2">Lỗi tải dữ liệu</p>
-              <p className="text-gray-600 text-sm mb-4">{error}</p>
+              <p className="text-red-600 font-medium text-sm sm:text-lg mb-2 sm:mb-3">Lỗi tải dữ liệu</p>
+              <p className="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">{error}</p>
               <button
                 onClick={fetchChartData}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium shadow-lg"
               >
                 Thử lại
               </button>
             </div>
           </div>
         ) : chartData ? (
-          <div className="h-full">
+          <div className="h-full bg-white rounded-lg p-2 sm:p-4 shadow-sm relative">
+            {loading && (
+              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-lg">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-4 border-blue-600 mx-auto mb-2 sm:mb-4"></div>
+                  <p className="text-gray-600 text-xs sm:text-sm font-medium">Đang cập nhật dữ liệu...</p>
+                </div>
+              </div>
+            )}
             <Line data={chartData} options={chartOptions} />
           </div>
         ) : (
           <div className="h-full flex items-center justify-center">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <p className="text-gray-600">Không có dữ liệu để hiển thị</p>
+              <p className="text-gray-600 text-sm sm:text-lg font-medium">Không có dữ liệu để hiển thị</p>
             </div>
           </div>
         )}

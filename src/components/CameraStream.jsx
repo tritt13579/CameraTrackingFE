@@ -67,52 +67,69 @@ export default function CameraStream() {
   }
 
   return (
-    <div className="h-screen flex">
+    <div className="min-h-screen bg-gray-50">
       {/* Toast Container */}
       <ToastContainer />
 
-      {/* Nửa màn hình bên trái - Danh sách camera và khung giờ chụp */}
-      <div className="w-1/2 flex flex-col p-4 space-y-4">
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
+            Hệ thống Camera Tracking
+          </h1>
+          <div className="flex items-center space-x-2">
+            <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-600">
+              <span>Camera đang chọn: {selectedCamera?.camera_id || 'Chưa chọn'}</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-          {/* Tab Content */}
-          <div className="h-48">
-            {activeTab === "cameras" ? (
-              <CameraListTab
-                cameras={cameras}
-                selectedCamera={selectedCamera}
-                onCameraSelect={handleCameraSelectWithWebSocket}
-                onAddCamera={handleAddCamera}
-              />
-            ) : (
-              <ScheduleTab
-                scheduleTimes={scheduleTimes}
-                scheduleLoading={scheduleLoading}
-                onUpdateScheduleTime={updateScheduleTime}
-                formatTime={formatTime}
-              />
-            )}
+      {/* Main Content */}
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
+        {/* Left Panel - Camera List & Stream */}
+        <div className="w-full lg:w-1/2 flex flex-col p-2 sm:p-4 space-y-2 sm:space-y-4">
+          {/* Tab Navigation & Camera List */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 flex-shrink-0">
+            <TabNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+
+            {/* Tab Content */}
+            <div className="h-48">
+              {activeTab === "cameras" ? (
+                <CameraListTab
+                  cameras={cameras}
+                  selectedCamera={selectedCamera}
+                  onCameraSelect={handleCameraSelectWithWebSocket}
+                  onAddCamera={handleAddCamera}
+                />
+              ) : (
+                <ScheduleTab
+                  scheduleTimes={scheduleTimes}
+                  scheduleLoading={scheduleLoading}
+                  onUpdateScheduleTime={updateScheduleTime}
+                  formatTime={formatTime}
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Stream video */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 flex-1 min-h-48">
+            <StreamViewer
+              selectedCamera={selectedCamera}
+              streamStatus={streamStatus}
+              streamError={streamError}
+              imageLoaded={imageLoaded}
+              imgRef={imgRef}
+              onReconnect={connectWebSocket}
+            />
           </div>
         </div>
 
-        {/* Stream video */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 flex-1 min-h-0">
-          <StreamViewer
-            selectedCamera={selectedCamera}
-            streamStatus={streamStatus}
-            streamError={streamError}
-            imageLoaded={imageLoaded}
-            imgRef={imgRef}
-            onReconnect={connectWebSocket}
-          />
+        {/* Right Panel - Settlement Chart */}
+        <div className="w-full lg:w-1/2 p-2 sm:p-4">
+          <SettlementChart />
         </div>
-      </div>
-
-      {/* Nửa màn hình bên phải - Biểu đồ độ lún */}
-      <div className="w-1/2 p-4">
-        <SettlementChart />
       </div>
 
       {/* Modal thêm camera */}

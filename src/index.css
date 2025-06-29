@@ -32,3 +32,207 @@
 .modal-slide-out {
   animation: modalSlideOut 0.3s ease-in;
 }
+
+/* Custom styles for react-datepicker */
+.datepicker-popper {
+  z-index: 1000;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: white;
+}
+
+.react-datepicker__header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 12px 12px 0 0;
+  padding: 16px;
+}
+
+.react-datepicker__current-month {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.react-datepicker__day-name {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  font-size: 14px;
+  margin: 4px;
+}
+
+.react-datepicker__day {
+  color: #374151;
+  font-weight: 500;
+  border-radius: 8px;
+  margin: 2px;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  transition: all 0.2s ease;
+}
+
+.react-datepicker__day:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.react-datepicker__day--selected {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.react-datepicker__day--in-range {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+  font-weight: 600;
+}
+
+.react-datepicker__day--keyboard-selected {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+}
+
+.react-datepicker__day--in-selecting-range {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  color: #1e40af;
+}
+
+.react-datepicker__day--range-start {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.react-datepicker__day--range-end {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.react-datepicker__day--outside-month {
+  color: #9ca3af;
+}
+
+.react-datepicker__navigation {
+  top: 16px;
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: white;
+  border-width: 2px 2px 0 0;
+}
+
+.react-datepicker__navigation:hover *::before {
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.react-datepicker__month-container {
+  background: white;
+  border-radius: 12px;
+}
+
+.react-datepicker__month {
+  margin: 8px;
+}
+
+.react-datepicker__header__dropdown {
+  display: none;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive improvements */
+@media (max-width: 640px) {
+  /* Mobile-specific styles */
+  .react-datepicker {
+    font-size: 14px;
+  }
+  
+  .react-datepicker__day {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
+  }
+  
+  .react-datepicker__header {
+    padding: 12px;
+  }
+  
+  .react-datepicker__current-month {
+    font-size: 14px;
+  }
+  
+  .react-datepicker__day-name {
+    font-size: 12px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  /* Increase touch targets on mobile */
+  button, 
+  input[type="button"], 
+  input[type="submit"], 
+  input[type="reset"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve touch scrolling */
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode styles if needed */
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-gray-50 {
+    background-color: #ffffff;
+  }
+  
+  .border-gray-200 {
+    border-color: #000000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
