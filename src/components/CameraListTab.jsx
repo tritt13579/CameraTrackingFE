@@ -34,7 +34,7 @@ export default function CameraListTab({
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium truncate">
-                  Camera {camera.camera_id || camera.name || index + 1}
+                  {camera.name || camera.camera_id || index + 1}
                 </span>
                 {selectedCamera?.camera_id === camera.camera_id && (
                   <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-2"></div>
