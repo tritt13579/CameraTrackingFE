@@ -77,11 +77,6 @@ export default function CameraStream() {
           <h1 className="text-xl font-bold text-gray-900 sm:text-2xl">
             Hệ thống Camera Tracking
           </h1>
-          <div className="flex items-center space-x-2">
-            <div className="hidden sm:flex items-center space-x-4 text-sm text-gray-600">
-              <span>Camera đang chọn: {selectedCamera?.camera_id || 'Chưa chọn'}</span>
-            </div>
-          </div>
         </div>
       </header>
 

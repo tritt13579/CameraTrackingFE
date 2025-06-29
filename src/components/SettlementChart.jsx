@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -36,34 +36,19 @@ export default function SettlementChart() {
     endOfDay(new Date())
   ]);
   const [startDate, endDate] = dateRange;
-  const [isDateRangeComplete, setIsDateRangeComplete] = useState(true); // Thêm state để theo dõi việc chọn date range
-
-  // Tính toán thời gian bắt đầu và kết thúc
-  const getTimeRange = () => {
-    const from = startDate;
-    const to = endDate;
-
-    return {
-      from: from.toISOString(),
-      to: to.toISOString(),
-    };
-  };
+  const [isDateRangeComplete, setIsDateRangeComplete] = useState(true); 
 
   // Xử lý thay đổi date range
   const handleDateRangeChange = (update) => {
     setDateRange(update);
     const [newStartDate, newEndDate] = update;
     
-    // Kiểm tra xem cả hai ngày đã được chọn chưa
     const isComplete = newStartDate && newEndDate;
     setIsDateRangeComplete(isComplete);
-    
-    // Không xóa dữ liệu biểu đồ khi đang chọn ngày
-    // Chỉ cập nhật khi đã chọn xong
   };
 
   // Fetch dữ liệu từ API
-  const fetchChartData = async () => {
+  const fetchChartData = useCallback(async () => {
     // Chỉ fetch khi date range đã hoàn chỉnh
     if (!isDateRangeComplete) {
       console.log("⏳ Chưa chọn đủ ngày bắt đầu và kết thúc");
@@ -74,7 +59,13 @@ export default function SettlementChart() {
     setError(null);
 
     try {
-      const { from, to } = getTimeRange();
+      // Tính toán thời gian bắt đầu và kết thúc
+      const from = startDate;
+      const to = endDate;
+      const timeRange = {
+        from: from.toISOString(),
+        to: to.toISOString(),
+      };
       
       // Mặc định: QR 1 của camera 1 là QR động, QR 2 của camera 2 là QR cố định
       const params = {
@@ -83,25 +74,14 @@ export default function SettlementChart() {
         camera_id_movable: 1,
         camera_id_fixed: 2,
         interval: interval,
-        time_from: from,
-        time_to: to,
+        time_from: timeRange.from,
+        time_to: timeRange.to,
       };
 
-      console.log("🚀 Gọi API Settlement Chart với params:", params);
-      console.log("📅 Khoảng thời gian:", { from, to });
-      console.log("⏰ Interval:", interval);
 
       const data = await apiService.getSettlementChart(params);
       
-      console.log("✅ Dữ liệu API trả về:", data);
-      console.log("📊 Số lượng điểm dữ liệu:", data.length);
-      
-      if (data.length > 0) {
-        console.log("📈 Điểm dữ liệu đầu tiên:", data[0]);
-        console.log("📉 Điểm dữ liệu cuối cùng:", data[data.length - 1]);
-        console.log("🔢 Giá trị độ lún:", data.map(item => item.settlement));
-      }
-      
+
       // Chuyển đổi dữ liệu cho Chart.js
       const chartData = {
         labels: data.map(item => {
@@ -137,7 +117,6 @@ export default function SettlementChart() {
         ],
       };
 
-      console.log("🎨 Dữ liệu Chart.js:", chartData);
       setChartData(chartData);
     } catch (err) {
       console.error("❌ Lỗi khi tải dữ liệu biểu đồ:", err);
@@ -146,7 +125,7 @@ export default function SettlementChart() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [interval, startDate, endDate, isDateRangeComplete]);
 
   // Tự động fetch dữ liệu khi component mount hoặc khi thay đổi tham số
   useEffect(() => {
@@ -154,7 +133,7 @@ export default function SettlementChart() {
     if (isDateRangeComplete) {
       fetchChartData();
     }
-  }, [interval, dateRange, isDateRangeComplete]);
+  }, [interval, dateRange, isDateRangeComplete, fetchChartData]);
 
   const chartOptions = {
     responsive: true,
