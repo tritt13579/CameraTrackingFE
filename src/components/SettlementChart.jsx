@@ -124,7 +124,7 @@ export default function SettlementChart() {
     } finally {
       setLoading(false);
     }
-  }, [interval, startDate, endDate, isDateRangeComplete, createApiParams]);
+  }, [interval, isDateRangeComplete, createApiParams]);
 
   // Download CSV function
   const handleDownloadExcel = async () => {
